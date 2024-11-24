@@ -1,21 +1,38 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
+const cors = require('cors');
 const app = express();
-const PORT = 5000;
 
-// MongoDB bağlantısı
-mongoose.connect('mongodb://mongo:27017/mern-db', {
+// CORS yapılandırmasını etkinleştirin
+app.use(cors());  // Bu, tüm origin'lere izin verir.
+
+// MongoDB bağlantı ayarları (Docker Compose'da servis adı kullanılarak güncellendi)
+mongoose.connect('mongodb://mongodb:27017/mern-db', {  // "mongodb" burada servis adıdır
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
+})
+  .then(() => {
+    console.log('MongoDB bağlantısı başarılı!');
+  })
+  .catch((err) => {
+    console.error('MongoDB bağlantısı başarısız: ', err);
+  });
 
-mongoose.connection.once('open', () => {
-  console.log('MongoDB bağlantısı başarılı!');
-});
+// Middleware
+app.use(express.json());
 
+// Basit bir GET isteği ile test endpoint
 app.get('/', (req, res) => {
-  res.send('MERN Backend çalışıyor!');
+  res.send('Express.js Backend çalışıyor!');
 });
 
-app.listen(PORT, () => console.log(`Server ${PORT} portunda çalışıyor`));
+// API endpoint
+app.get('/api-endpoint', (req, res) => {
+  res.json({ message: "API'den veri başarıyla alındı!" });
+});
+
+// Backend uygulaması 5000 portunda çalışacak
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server ${PORT} portunda çalışıyor.`);
+});

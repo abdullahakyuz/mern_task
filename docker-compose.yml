@@ -1,17 +1,36 @@
-version: '3.8'
+version: '3'
+
 services:
-  frontend:
-    build: ./frontend
+  react-app:
+    build:
+      context: ./frontend
     ports:
-      - "3000:3000"
-  backend:
-    build: ./backend
+      - "80:80" # React uygulaması 3000 portunda çalışacak, dışarıya 80 portu yönlendirilmiş
+    depends_on:
+      - express-backend
+    networks:
+      - mern-network
+
+  express-backend:
+    build:
+      context: ./backend
     ports:
       - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/mern-db # MongoDB'ye bağlantı servisi adıyla yapılır
     depends_on:
-      - mongo
-  mongo:
-    image: mongo:6.0
-    container_name: mongo
+      - mongodb
+    networks:
+      - mern-network
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
     ports:
       - "27017:27017"
+    networks:
+      - mern-network
+
+networks:
+  mern-network:
+    driver: bridge
