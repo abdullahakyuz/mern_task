@@ -1,38 +1,58 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const winston = require('winston');
 const app = express();
 
-// CORS yapılandırmasını etkinleştirin
-app.use(cors());  // Bu, tüm origin'lere izin verir.
+// Winston Logger Ayarları
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(), // Konsola yaz
+    new winston.transports.File({ filename: 'backend.log' }) // backend.log dosyasına yaz
+  ]
+});
 
-// MongoDB bağlantı ayarları (Docker Compose'da servis adı kullanılarak güncellendi)
-mongoose.connect('mongodb://mongodb:27017/mern-db', {  // "mongodb" burada servis adıdır
+// Middleware
+app.use(cors()); // CORS yapılandırması
+app.use(express.json());
+
+// MongoDB Bağlantısı
+mongoose.connect('mongodb://mongodb:27017/mern-db', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
   .then(() => {
-    console.log('MongoDB bağlantısı başarılı!');
+    logger.info('MongoDB bağlantısı başarılı!');
   })
   .catch((err) => {
-    console.error('MongoDB bağlantısı başarısız: ', err);
+    logger.error('MongoDB bağlantısı başarısız: ', err);
   });
 
-// Middleware
-app.use(express.json());
-
-// Basit bir GET isteği ile test endpoint
+// Test Endpoint
 app.get('/', (req, res) => {
+  logger.info('Ana endpoint çağrıldı.');
   res.send('Express.js Backend çalışıyor!');
 });
 
-// API endpoint
+// API Endpoint
 app.get('/api-endpoint', (req, res) => {
+  logger.info('API endpoint çağrıldı.');
   res.json({ message: "API'den veri başarıyla alındı!" });
 });
 
-// Backend uygulaması 5000 portunda çalışacak
+// Hata Yakalama Middleware
+app.use((err, req, res, next) => {
+  logger.error(`Hata: ${err.message}`);
+  res.status(500).json({ error: err.message });
+});
+
+// Sunucu Başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server ${PORT} portunda çalışıyor.`);
+  logger.info(`Sunucu ${PORT} portunda çalışıyor.`);
 });
