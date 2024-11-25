@@ -2,95 +2,80 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
-        DOCKER_REPO = 'aakyuz1'
+        FRONTEND_DIR = "frontend"
+        BACKEND_DIR = "backend"
+        FRONTEND_IMAGE = "react-app"
+        BACKEND_IMAGE = "expressjs-app"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Detect Changes') {
+        stage('Determine Changes') {
             steps {
                 script {
-                    // Geçici çözüm: tüm aşamalar çalıştırılacak
-                    env.FRONTEND_CHANGED = true
-                    env.BACKEND_CHANGED = true
+                    // Git değişikliklerini kontrol et
+                    def changes = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
+                    env.FRONTEND_CHANGED = changes.contains("${FRONTEND_DIR}/")
+                    env.BACKEND_CHANGED = changes.contains("${BACKEND_DIR}/")
                 }
             }
         }
 
-        stage('Build and Push Docker Images') {
-            parallel {
-                stage('Build Frontend Docker Image') {
-                    when {
-                        expression { return env.FRONTEND_CHANGED.toBoolean() }
-                    }
-                    steps {
-                        dir('frontend') {
-                            script {
-                                def frontendImage = "${DOCKER_REPO}/mern_frontend:latest"
-                                sh "docker build -t ${frontendImage} ."
-                                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                                    sh "docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
-                                    sh "docker push ${frontendImage}"
-                                }
-                            }
-                        }
-                    }
-                }
-
-                stage('Build Backend Docker Image') {
-                    when {
-                        expression { return env.BACKEND_CHANGED.toBoolean() }
-                    }
-                    steps {
-                        dir('backend') {
-                            script {
-                                def backendImage = "${DOCKER_REPO}/mern_backend:latest"
-                                sh "docker build -t ${backendImage} ."
-                                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                                    sh "docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
-                                    sh "docker push ${backendImage}"
-                                }
-                            }
-                        }
-                    }
+        stage('Build and Deploy Frontend') {
+            when {
+                expression { env.FRONTEND_CHANGED.toBoolean() }
+            }
+            steps {
+                echo "Building and Deploying Frontend"
+                script {
+                    sh """
+                        docker build -t ${FRONTEND_IMAGE}:latest ${FRONTEND_DIR}
+                        docker stop ${FRONTEND_IMAGE} || true
+                        docker rm ${FRONTEND_IMAGE} || true
+                        docker run -d --name ${FRONTEND_IMAGE} -p 80:80 ${FRONTEND_IMAGE}:latest
+                    """
                 }
             }
         }
 
-        stage('Update Kubernetes Deployment') {
+        stage('Build and Deploy Backend') {
+            when {
+                expression { env.BACKEND_CHANGED.toBoolean() }
+            }
             steps {
+                echo "Building and Deploying Backend"
                 script {
-                    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
-                        if (env.FRONTEND_CHANGED.toBoolean()) {
-                            sh """
-                            kubectl set image deployment/react-app react-app=${DOCKER_REPO}/mern_frontend:latest
-                            kubectl rollout restart deployment/react-app
-                            """
-                        }
-                        if (env.BACKEND_CHANGED.toBoolean()) {
-                            sh """
-                            kubectl set image deployment/expressjs-app expressjs-app=${DOCKER_REPO}/mern_backend:latest
-                            kubectl rollout restart deployment/expressjs-app
-                            """
-                        }
-                    }
+                    sh """
+                        docker build -t ${BACKEND_IMAGE}:latest ${BACKEND_DIR}
+                        docker stop ${BACKEND_IMAGE} || true
+                        docker rm ${BACKEND_IMAGE} || true
+                        docker run -d --name ${BACKEND_IMAGE} -p 3000:3000 ${BACKEND_IMAGE}:latest
+                    """
+                }
+            }
+        }
+
+        stage('Cleanup Unused Images') {
+            steps {
+                echo "Cleaning up unused Docker images"
+                script {
+                    sh """
+                        docker image prune -f
+                        docker container prune -f
+                    """
                 }
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline başarıyla tamamlandı!'
-        }
-        failure {
-            echo 'Pipeline başarısız oldu.'
+        always {
+            echo "Pipeline completed"
         }
     }
 }
