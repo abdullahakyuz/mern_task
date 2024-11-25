@@ -92,15 +92,14 @@ pipeline {
         stage('Cleanup Unused Resources') {
             steps {
                 script {
-                    // Kullanılmayan Docker imajlarını temizle
+                    // Docker temizleme
                     sh "docker image prune -a -f --filter 'until=24h'"
                     
-                    // Kubernetes'te kullanılmayan pod'ları temizle
-                    sh "kubectl delete pod --field-selector=status.phase=Failed"
-                    sh "kubectl delete pod --field-selector=status.phase=Succeeded"
-                    
-                    // Eski Kubernetes resource'larını temizle
-                    sh "kubectl get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase | grep Evicted | awk '{print \$1}' | xargs kubectl delete pod"
+                    // Kubernetes temizleme, yetki kontrolü
+                    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
+                        sh "kubectl delete pod --field-selector=status.phase=Failed"
+                        sh "kubectl delete pod --field-selector=status.phase=Succeeded"
+                        sh "kubectl get pods | grep Evicted | awk '{print $1}' | xargs kubectl delete pod || true"
                 }
             }
         }
