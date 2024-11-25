@@ -85,7 +85,7 @@ pipeline {
                     try {
                         // Kubernetes komutlarını çalıştır
                         sh """
-                            kubectl get pods -n ${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs kubectl delete -n ${K8S_NAMESPACE} --force --grace-period=0
+                            kubectl get pods --field-selector=status.phase=Terminating -o name | xargs kubectl delete
                         """
                     } catch (Exception e) {
                         echo "Failed to delete terminating pods: ${e.getMessage()}"
