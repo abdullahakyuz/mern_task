@@ -39,7 +39,7 @@ pipeline {
                                 def frontendImage = "${DOCKER_REPO}/mern_frontend:latest"
                                 sh "docker build -t ${frontendImage} ."
                                 withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                                    sh "docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
                                     sh "docker push ${frontendImage}"
                                 }
                             }
@@ -57,7 +57,7 @@ pipeline {
                                 def backendImage = "${DOCKER_REPO}/mern_backend:latest"
                                 sh "docker build -t ${backendImage} ."
                                 withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                                    sh "docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD"
                                     sh "docker push ${backendImage}"
                                 }
                             }
@@ -94,12 +94,15 @@ pipeline {
                 script {
                     // Docker temizleme
                     sh "docker image prune -a -f --filter 'until=24h'"
-                    
-                    // Kubernetes temizleme, yetki kontrolü
+
+                    // Kubernetes temizleme
                     withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
                         sh "kubectl delete pod --field-selector=status.phase=Failed"
                         sh "kubectl delete pod --field-selector=status.phase=Succeeded"
-                        sh "kubectl get pods | grep Evicted | awk '{print $1}' | xargs kubectl delete pod || true"
+                        sh """
+                        kubectl get pods | grep Evicted | awk '{print \$1}' | xargs kubectl delete pod || true
+                        """
+                    }
                 }
             }
         }
