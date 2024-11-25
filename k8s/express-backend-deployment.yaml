@@ -1,36 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: express-backend
+  name: expressjs-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: express-backend
+      app: expressjs-app
   template:
     metadata:
       labels:
-        app: express-backend
+        app: expressjs-app
     spec:
       containers:
-        - name: express-backend
-          image: 851725405355.dkr.ecr.eu-west-1.amazonaws.com/mern_backend:latest
-          ports:
-            - containerPort: 3000
-      imagePullSecrets:
-        - name: ecr-secret  # ECR'den imaj çekebilmek için gerekli secret
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: express-backend
-spec:
-  selector:
-    app: express-backend
-  ports:
-    - protocol: TCP
-      port: 3000          # Kubernetes servisi üzerinden kullanılacak port
-      targetPort: 3000    # Pod içerisindeki container portu
-      nodePort: 31000     # Dış dünyadan erişmek için belirlediğiniz port
-  type: NodePort         # Bu servis türü dışarıdan erişime izin verir
+      - name: expressjs-app
+        image: docker.io/aakyuz1/mern_backend:latest

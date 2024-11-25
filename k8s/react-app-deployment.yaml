@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: react-app
-          image: 851725405355.dkr.ecr.eu-west-1.amazonaws.com/mern-react-app
+          image: aakyuz1/mern_frontend:latest
           ports:
             - containerPort: 80
       imagePullSecrets:
