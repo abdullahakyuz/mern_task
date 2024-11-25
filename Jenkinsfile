@@ -6,6 +6,7 @@ pipeline {
         BACKEND_DIR = "backend"
         FRONTEND_IMAGE = "react-app"
         BACKEND_IMAGE = "expressjs-app"
+        K8S_NAMESPACE = "default"  // Kubernetes namespace, uygun şekilde güncellenebilir
     }
 
     stages {
@@ -67,6 +68,21 @@ pipeline {
                     sh """
                         docker image prune -f
                         docker container prune -f
+                    """
+                }
+            }
+        }
+
+        stage('Force Delete Old Pods') {
+            steps {
+                echo "Waiting 30 seconds before force deleting old pods"
+                script {
+                    // 30 saniye bekleme
+                    sleep 30
+
+                    echo "Force deleting old pods in terminating state"
+                    sh """
+                        kubectl get pods -n ${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs kubectl delete -n ${K8S_NAMESPACE} --force --grace-period=0
                     """
                 }
             }
