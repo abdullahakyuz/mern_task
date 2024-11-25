@@ -100,7 +100,7 @@ pipeline {
                     sh "kubectl delete pod --field-selector=status.phase=Succeeded"
                     
                     // Eski Kubernetes resource'larını temizle
-                    sh "kubectl get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase | grep Evicted | awk '{print $1}' | xargs kubectl delete pod"
+                    sh "kubectl get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase | grep Evicted | awk '{print \$1}' | xargs kubectl delete pod"
                 }
             }
         }
