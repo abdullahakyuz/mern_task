@@ -69,14 +69,14 @@ pipeline {
                     withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
                         if (env.FRONTEND_CHANGED.toBoolean()) {
                             sh """
-                            kubectl set image deployment/react-app-deployment react-app=${DOCKER_REPO}/mern_frontend:latest
-                            kubectl rollout restart deployment/react-app-deployment
+                            kubectl set image deployment/react-app react-app=${DOCKER_REPO}/mern_frontend:latest
+                            kubectl rollout restart deployment/react-app
                             """
                         }
                         if (env.BACKEND_CHANGED.toBoolean()) {
                             sh """
-                            kubectl set image deployment/express-backend-deployment expressjs-app=${DOCKER_REPO}/mern_backend:latest
-                            kubectl rollout restart deployment/express-backend-deployment
+                            kubectl set image deployment/expressjs-app expressjs-app=${DOCKER_REPO}/mern_backend:latest
+                            kubectl rollout restart deployment/expressjs-app
                             """
                         }
                     }
