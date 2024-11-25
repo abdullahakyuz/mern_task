@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-app
+  template:
+    metadata:
+      labels:
+        app: react-app
+    spec:
+      containers:
+        - name: react-app
+          image: 851725405355.dkr.ecr.eu-west-1.amazonaws.com/mern-react-app
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ecr-secret  # ECR'den imaj çekebilmek için gerekli secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-app
+spec:
+  selector:
+    app: react-app
+  ports:
+    - protocol: TCP
+      port: 80            # Kubernetes servisi üzerinden kullanılacak port
+      targetPort: 80      # Pod içerisindeki container portu
+      nodePort: 30000     # Dış dünyadan erişmek için belirlediğiniz port
+  type: NodePort         # Bu servis türü dışarıdan erişime izin verir

@@ -50,6 +50,10 @@ services:
       - prometheus
     networks:
       - mern-network
+    command:
+      - "grafana cli plugins update-all && grafana"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-lokiexplore-app,grafana-clock-panel
 
   node-exporter:
     image: prom/node-exporter:latest
