@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        KUBECONFIG = '/home/ubuntu/.kube/config'
         FRONTEND_DIR = "frontend"
         BACKEND_DIR = "backend"
         FRONTEND_IMAGE = "react-app"
@@ -73,21 +74,25 @@ pipeline {
             }
         }
 
-        stage('Force Delete Old Pods') {
-            steps {
-                echo "Waiting 30 seconds before force deleting old pods"
-                script {
-                    // 30 saniye bekleme
-                    sleep 30
+stage('Force Delete Old Pods') {
+    steps {
+        echo "Waiting 30 seconds before force deleting old pods"
+        script {
+            // 30 saniye bekleme
+            sleep 30
 
-                    echo "Force deleting old pods in terminating state"
-                    sh """
-                        kubectl get pods -n ${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs kubectl delete -n ${K8S_NAMESPACE} --force --grace-period=0
-                    """
-                }
+            echo "Force deleting old pods in terminating state"
+            try {
+                // Kubernetes komutlarını çalıştır
+                sh """
+                    kubectl get pods -n ${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs kubectl delete -n ${K8S_NAMESPACE} --force --grace-period=0
+                """
+            } catch (Exception e) {
+                echo "Failed to delete terminating pods: ${e.getMessage()}"
             }
         }
     }
+}
 
     post {
         always {
