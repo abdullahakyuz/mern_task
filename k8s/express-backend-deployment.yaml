@@ -12,6 +12,7 @@ spec:
       labels:
         app: expressjs-app
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
       - name: expressjs-app
         image: docker.io/aakyuz1/mern_backend:latest

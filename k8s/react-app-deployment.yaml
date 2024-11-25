@@ -12,6 +12,7 @@ spec:
       labels:
         app: react-app
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
         - name: react-app
           image: aakyuz1/mern_frontend:latest
