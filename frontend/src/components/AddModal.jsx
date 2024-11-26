@@ -22,7 +22,6 @@ function AddModal({ showModal, handleClose, drName, addAppointment }) {
     setDate("")
     handleClose()
   };
-
   
   return (
     <>

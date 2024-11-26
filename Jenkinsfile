@@ -46,9 +46,12 @@ pipeline {
             steps {
                 script {
                     echo "Determining changes..."
+                    
+                    // Uzak depo bilgilerini güncelle
+                    sh 'git fetch origin'
 
                     // Git diff komutunu 'origin/main' dalına göre kontrol et
-                    def changes = sh(script: "git diff --name-only origin/main...HEAD", returnStdout: true).trim()
+                    def changes = sh(script: "git diff --name-only origin/main...origin/main", returnStdout: true).trim()
                     echo "Git Diff Output: ${changes}"
 
                     // Değişikliklerin frontend ve backend dizinlerinde olup olmadığını kontrol et
