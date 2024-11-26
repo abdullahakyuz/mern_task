@@ -62,13 +62,11 @@ pipeline {
             steps {
                 echo "Building, tagging, and pushing Frontend"
                 script {
+                    def frontendTag = "latest"
                     sh """
-                        docker image prune -f
-                        docker image build -f Dockerfile -t ${FRONTEND_IMAGE}:latest .
-                        docker image tag ${FRONTEND_IMAGE}:latest ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
-                        docker image prune -f
-      - 
+                        docker image build -f ${FRONTEND_DIR}/Dockerfile -t ${FRONTEND_IMAGE}:${frontendTag} ${FRONTEND_DIR}
+                        docker image tag ${FRONTEND_IMAGE}:${frontendTag} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
                     """
                 }
             }
@@ -81,12 +79,11 @@ pipeline {
             steps {
                 echo "Building, tagging, and pushing Backend"
                 script {
+                    def backendTag = "latest"
                     sh """
-                        docker image prune -f
-                        docker image build -f Dockerfile -t ${BACKEND_IMAGE}:latest .
-                        docker image tag ${BACKEND_IMAGE}:latest ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
-                        docker image prune -f
+                        docker image build -f ${BACKEND_DIR}/Dockerfile -t ${BACKEND_IMAGE}:${backendTag} ${BACKEND_DIR}
+                        docker image tag ${BACKEND_IMAGE}:${backendTag} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:${backendTag}
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:${backendTag}
                     """
                 }
             }
@@ -123,8 +120,8 @@ pipeline {
                 echo "Cleaning up unused Docker images"
                 script {
                     sh """
-                        docker image prune -f
-                        docker container prune -f
+                        docker system prune -af
+                        docker volume prune -f
                     """
                 }
             }
