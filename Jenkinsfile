@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG = '/home/ubuntu/.kube/config'
         FRONTEND_DIR = "frontend"
         BACKEND_DIR = "backend"
         FRONTEND_IMAGE = "mern_frontend"
@@ -31,6 +30,18 @@ pipeline {
             }
         }
 
+        stage('Setup KUBECONFIG') {
+            steps {
+                echo "Setting up KUBECONFIG..."
+                withCredentials([file(credentialsId: 'kubeconfig-credential-id', variable: 'KUBECONFIG_FILE')]) {
+                    sh """
+                        mkdir -p ~/.kube
+                        cp ${KUBECONFIG_FILE} ~/.kube/config
+                    """
+                }
+            }
+        }
+
         stage('Determine Changes') {
             steps {
                 script {
@@ -52,8 +63,12 @@ pipeline {
                 echo "Building, tagging, and pushing Frontend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest ${FRONTEND_DIR}
+                        docker image prune -f
+                        docker image build -f Dockerfile -t ${FRONTEND_IMAGE}:latest .
+                        docker image tag ${FRONTEND_IMAGE}:latest ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
                         docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                        docker image prune -f
+      - 
                     """
                 }
             }
@@ -67,8 +82,11 @@ pipeline {
                 echo "Building, tagging, and pushing Backend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest ${BACKEND_DIR}
+                        docker image prune -f
+                        docker image build -f Dockerfile -t ${BACKEND_IMAGE}:latest .
+                        docker image tag ${BACKEND_IMAGE}:latest ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
                         docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker image prune -f
                     """
                 }
             }
@@ -129,6 +147,10 @@ pipeline {
     post {
         always {
             echo "Pipeline completed"
+            script {
+                echo "Cleaning up KUBECONFIG..."
+                sh 'rm -f ~/.kube/config'
+            }
         }
     }
 }
