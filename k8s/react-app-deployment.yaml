@@ -12,14 +12,14 @@ spec:
       labels:
         app: react-app
     spec:
-      terminationGracePeriodSeconds: 10
       containers:
         - name: react-app
           image: aakyuz1/mern_frontend:latest
+          imagePullPolicy: Always  # Her zaman güncel imajı çek
           ports:
             - containerPort: 80
       imagePullSecrets:
-        - name: ecr-secret  # ECR'den imaj çekebilmek için gerekli secret
+        - name: ecr-secret
 
 ---
 apiVersion: v1

@@ -52,7 +52,7 @@ pipeline {
                 echo "Building, tagging, and pushing Frontend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest .
+                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest ${FRONTEND_DIR}
                         docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
                     """
                 }
@@ -67,9 +67,35 @@ pipeline {
                 echo "Building, tagging, and pushing Backend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest .
+                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest ${BACKEND_DIR}
                         docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
                     """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            when {
+                anyOf {
+                    expression { env.FRONTEND_CHANGED == "true" }
+                    expression { env.BACKEND_CHANGED == "true" }
+                }
+            }
+            steps {
+                script {
+                    if (env.FRONTEND_CHANGED == "true") {
+                        echo "Restarting Frontend Deployment in Kubernetes..."
+                        sh """
+                            kubectl rollout restart deployment/react-app --namespace=${K8S_NAMESPACE}
+                        """
+                    }
+
+                    if (env.BACKEND_CHANGED == "true") {
+                        echo "Restarting Backend Deployment in Kubernetes..."
+                        sh """
+                            kubectl rollout restart deployment/expressjs-app --namespace=${K8S_NAMESPACE}
+                        """
+                    }
                 }
             }
         }

@@ -16,3 +16,4 @@ spec:
       containers:
       - name: expressjs-app
         image: docker.io/aakyuz1/mern_backend:latest
+        imagePullPolicy: Always
