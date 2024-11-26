@@ -1,38 +1,45 @@
-.App {
-  text-align: center;
+/*? Global Stlye for App */
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.doctor-img {
+  transition: transform 0.5s;
+  border-radius: 1rem;
+  max-height: 170px;
+}
+.doctor-img:hover {
+  transform: scale(1.05);
+  border: 2px solid #101415;
+  cursor: pointer;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.appointments {
+  width: 100%;
+  max-width: 1200px;
+  min-width: 275px;
+  border-radius: 0.3rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-align: start;
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+  box-shadow: 0px 3px 3px rgba(0 0, 0, 0.3);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.consulted {
+  border-left: 1rem solid rgb(166, 18, 189);
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.consulted::after {
+  content: "CONSULTED";
+  background-color: rgb(166, 18, 189);
   color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  font-size: 2rem;
+  border-radius: 1rem;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 0.5rem;
+  transform: translate(-50%, -50%);
 }
