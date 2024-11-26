@@ -57,6 +57,19 @@ pipeline {
             }
         }
 
+        stage('Force Delete Old Pods') {
+            steps {
+                echo "Waiting 30 seconds before force deleting old pods"
+                script {
+                    sleep 30
+                    echo "Force deleting old pods in terminating state"
+                    sh """
+                        kubectl get pods --namespace=${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs -r kubectl delete --force --grace-period=0
+                    """
+                }
+            }
+        }
+
         stage('Build, Tag, and Push Frontend') {
             when {
                 expression { env.FRONTEND_CHANGED == "true" }
@@ -126,19 +139,6 @@ pipeline {
                     sh """
                         docker system prune -af
                         docker volume prune -f
-                    """
-                }
-            }
-        }
-
-        stage('Force Delete Old Pods') {
-            steps {
-                echo "Waiting 30 seconds before force deleting old pods"
-                script {
-                    sleep 30
-                    echo "Force deleting old pods in terminating state"
-                    sh """
-                        kubectl get pods --namespace=${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs -r kubectl delete --force --grace-period=0
                     """
                 }
             }
