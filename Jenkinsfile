@@ -8,8 +8,8 @@ pipeline {
         FRONTEND_IMAGE = "react-app"
         BACKEND_IMAGE = "expressjs-app"
         K8S_NAMESPACE = "default"  // Kubernetes namespace, uygun şekilde güncellenebilir
-        DOCKER_USERNAME = credentials('DOCKER_USERNAME') // Jenkins'de tanımlı Docker kullanıcı adı
-        DOCKER_PASSWORD = credentials('DOCKER_PASSWORD') // Jenkins'de tanımlı Docker şifresi
+        DOCKER_USERNAME = credentials('docker-hub-credentials').username
+        DOCKER_PASSWORD = credentials('docker-hub-credentials').password
         DOCKER_REGISTRY = "docker.io"
     }
 
