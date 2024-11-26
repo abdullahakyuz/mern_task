@@ -42,11 +42,12 @@ pipeline {
         stage('Check for Changes') {
             steps {
                 script {
+                    // Fetch the latest changes to ensure we are checking against the correct state
+                    sh 'git fetch origin'
                     // Checking if any changes exist in frontend or backend directories
                     def changes = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
                     echo "Changes: ${changes}"
 
-                    // Default to false if there are no changes detected
                     env.FRONTEND_CHANGED = changes.contains('frontend') ? "true" : "false"
                     env.BACKEND_CHANGED = changes.contains('backend') ? "true" : "false"
 
@@ -63,7 +64,6 @@ pipeline {
             steps {
                 echo "Building, tagging, and pushing Frontend"
                 script {
-                    def frontendTag = "latest"
                     sh """
                         docker image build -t ${FRONTEND_IMAGE}:latest ./frontend
                         docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
@@ -80,7 +80,6 @@ pipeline {
             steps {
                 echo "Building, tagging, and pushing Backend"
                 script {
-                    def backendTag = "latest"
                     sh """
                         docker image build -t ${BACKEND_IMAGE}:latest ./backend
                         docker tag ${BACKEND_IMAGE}:latest ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
