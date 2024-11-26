@@ -48,11 +48,14 @@ pipeline {
                 echo "Building, tagging, and pushing Frontend"
                 script {
                     def frontendTag = "latest"
-                    sh """
-                        docker image build -f ${FRONTEND_DIR}/Dockerfile -t ${FRONTEND_IMAGE}:${frontendTag} ${FRONTEND_DIR}
-                        docker image tag ${FRONTEND_IMAGE}:${frontendTag} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
-                    """
+sh """
+    docker images
+    docker image build -f ${FRONTEND_DIR}/Dockerfile -t ${FRONTEND_IMAGE}:${frontendTag} ${FRONTEND_DIR}
+    docker image tag ${FRONTEND_IMAGE}:${frontendTag} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
+    docker images  # Gerekirse, imajın burada görünüp görünmediğini kontrol edebilirsiniz.
+    docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
+"""
+
                 }
             }
         }
