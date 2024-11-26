@@ -5,9 +5,9 @@ pipeline {
         KUBECONFIG = '/home/ubuntu/.kube/config'
         FRONTEND_DIR = "frontend"
         BACKEND_DIR = "backend"
-        FRONTEND_IMAGE = "react-app"
-        BACKEND_IMAGE = "expressjs-app"
-        K8S_NAMESPACE = "default"  // Kubernetes namespace, uygun şekilde güncellenebilir
+        FRONTEND_IMAGE = "mern_frontend"
+        BACKEND_IMAGE = "mern_backend"
+        K8S_NAMESPACE = "default"
         DOCKER_REGISTRY = "docker.io"
     }
 
@@ -21,11 +21,11 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-            echo "Logging into Docker Hub..."
-            withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                sh """
-                    echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}
-                """
+                    echo "Logging into Docker Hub..."
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin ${DOCKER_REGISTRY}
+                        """
                     }
                 }
             }
@@ -34,25 +34,26 @@ pipeline {
         stage('Determine Changes') {
             steps {
                 script {
-                    // Git değişikliklerini kontrol et
-                    def changes = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
-                    env.FRONTEND_CHANGED = changes.contains("${FRONTEND_DIR}/")
-                    env.BACKEND_CHANGED = changes.contains("${BACKEND_DIR}/")
+                    echo "Determining changes..."
+                    def changes = sh(script: "git diff --name-only origin/main...HEAD", returnStdout: true).trim()
+                    env.FRONTEND_CHANGED = changes.contains("${FRONTEND_DIR}/") ? "true" : "false"
+                    env.BACKEND_CHANGED = changes.contains("${BACKEND_DIR}/") ? "true" : "false"
+                    echo "Frontend Changed: ${env.FRONTEND_CHANGED}"
+                    echo "Backend Changed: ${env.BACKEND_CHANGED}"
                 }
             }
         }
 
         stage('Build, Tag, and Push Frontend') {
             when {
-                expression { env.FRONTEND_CHANGED.toBoolean() }
+                expression { env.FRONTEND_CHANGED == "true" }
             }
             steps {
                 echo "Building, tagging, and pushing Frontend"
                 script {
                     sh """
-                        docker image build -f Dockerfile -t mern_${FRONTEND_DIR}:latest
-                        docker image tag mern_${FRONTEND_DIR}:latest 
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/mern_${FRONTEND_DIR}:latest
+                        docker build -t ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest .
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
                     """
                 }
             }
@@ -60,15 +61,14 @@ pipeline {
 
         stage('Build, Tag, and Push Backend') {
             when {
-                expression { env.BACKEND_CHANGED.toBoolean() }
+                expression { env.BACKEND_CHANGED == "true" }
             }
             steps {
                 echo "Building, tagging, and pushing Backend"
                 script {
                     sh """
-                        docker image build -f Dockerfile -t mern_${BACKEND_DIR}:latest
-                        docker image tag mern_${BACKEND_DIR}:latest 
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/mern_${BACKEND_DIR}:latest
+                        docker build -t ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest .
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
                     """
                 }
             }
@@ -90,18 +90,11 @@ pipeline {
             steps {
                 echo "Waiting 30 seconds before force deleting old pods"
                 script {
-                    // 30 saniye bekleme
                     sleep 30
-
                     echo "Force deleting old pods in terminating state"
-                    try {
-                        // Kubernetes komutlarını çalıştır
-                        sh """
-                            kubectl get pods --field-selector=status.phase=Terminating -o name | xargs kubectl delete --force --grace-period=0
-                        """
-                    } catch (Exception e) {
-                        echo "Failed to delete terminating pods: ${e.getMessage()}"
-                    }
+                    sh """
+                        kubectl get pods --field-selector=status.phase=Terminating -o name | xargs kubectl delete --force --grace-period=0
+                    """
                 }
             }
         }
