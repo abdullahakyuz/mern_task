@@ -50,8 +50,9 @@ pipeline {
                 echo "Building, tagging, and pushing Frontend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest ${FRONTEND_DIR}
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                        docker image build -f Dockerfile -t mern_${FRONTEND_DIR}:latest
+                        docker image tag mern_${FRONTEND_DIR}:latest 
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/mern_${FRONTEND_DIR}:latest
                     """
                 }
             }
@@ -65,8 +66,9 @@ pipeline {
                 echo "Building, tagging, and pushing Backend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest ${BACKEND_DIR}
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker image build -f Dockerfile -t mern_${BACKEND_DIR}:latest
+                        docker image tag mern_${BACKEND_DIR}:latest 
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/mern_${BACKEND_DIR}:latest
                     """
                 }
             }
