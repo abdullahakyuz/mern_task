@@ -23,6 +23,7 @@ function AddModal({ showModal, handleClose, drName, addAppointment }) {
     handleClose()
   };
   
+  
   return (
     <>
       <Modal show={showModal} onHide={handleClose} size={"lg"}>

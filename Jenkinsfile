@@ -42,31 +42,7 @@ pipeline {
             }
         }
 
-        stage('Determine Changes') {
-            steps {
-                script {
-                    echo "Determining changes..."
-                    
-                    // Uzak depo bilgilerini güncelle
-                    sh 'git fetch origin'
-
-                    // Git diff komutunu 'origin/main' dalına göre kontrol et
-                    def changes = sh(script: "git diff --name-only origin/main...origin/main", returnStdout: true).trim()
-                    echo "Git Diff Output: ${changes}"
-
-                    // Değişikliklerin frontend ve backend dizinlerinde olup olmadığını kontrol et
-                    env.FRONTEND_CHANGED = changes.contains("${FRONTEND_DIR}/") ? "true" : "false"
-                    env.BACKEND_CHANGED = changes.contains("${BACKEND_DIR}/") ? "true" : "false"
-                    echo "Frontend Changed: ${env.FRONTEND_CHANGED}"
-                    echo "Backend Changed: ${env.BACKEND_CHANGED}"
-                }
-            }
-        }
-
         stage('Build, Tag, and Push Frontend') {
-            when {
-                expression { env.FRONTEND_CHANGED == "true" }
-            }
             steps {
                 echo "Building, tagging, and pushing Frontend"
                 script {
@@ -81,9 +57,6 @@ pipeline {
         }
 
         stage('Build, Tag, and Push Backend') {
-            when {
-                expression { env.BACKEND_CHANGED == "true" }
-            }
             steps {
                 echo "Building, tagging, and pushing Backend"
                 script {
