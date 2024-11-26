@@ -6,8 +6,8 @@ pipeline {
         BACKEND_IMAGE = "mern_backend"
         K8S_NAMESPACE = "default"
         DOCKER_REGISTRY = "docker.io"
-        DOCKER_ID: "aakyuz1"
-        DOCKER_PW: "Ukraynali1"
+    DOCKER_ID = 'aakyuz1'
+    DOCKER_PW = 'Ukraynali1'
     }
 
     stages {
