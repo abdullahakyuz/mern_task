@@ -5,9 +5,8 @@ pipeline {
         FRONTEND_IMAGE = "mern_frontend"
         BACKEND_IMAGE = "mern_backend"
         K8S_NAMESPACE = "default"
-        DOCKER_REGISTRY = "docker.io"
-    DOCKER_ID = 'aakyuz1'
-    DOCKER_PW = 'Ukraynali1'
+    DOCKER_REGISTRY = "docker.io"
+    DOCKER_USERNAME = 'aakyuz1'
     }
 
     stages {
@@ -19,13 +18,11 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                script {
-                    echo "Logging into Docker Hub..."
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                            echo ${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
-                        """
-                    }
+        withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            script {
+                echo "Logging into Docker Hub..."
+                sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
+            }
                 }
             }
         }
