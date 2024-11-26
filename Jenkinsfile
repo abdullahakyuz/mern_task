@@ -1,14 +1,13 @@
 pipeline {
     agent any
 
-environment {
-    FRONTEND_IMAGE = "mern_frontend"
-    BACKEND_IMAGE = "mern_backend"
-    K8S_NAMESPACE = "default"
-    DOCKER_REGISTRY = "docker.io"
-    DOCKER_USERNAME = 'aakyuz1'
-}
-
+    environment {
+        FRONTEND_IMAGE = "mern_frontend"
+        BACKEND_IMAGE = "mern_backend"
+        K8S_NAMESPACE = "default"
+        DOCKER_REGISTRY = "docker.io"
+        DOCKER_USERNAME = 'aakyuz1'
+    }
 
     stages {
         stage('Checkout Code') {
@@ -19,11 +18,11 @@ environment {
 
         stage('Docker Login') {
             steps {
-        withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-            script {
-                echo "Logging into Docker Hub..."
-                sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
-            }
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    script {
+                        echo "Logging into Docker Hub..."
+                        sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
+                    }
                 }
             }
         }
@@ -36,6 +35,22 @@ environment {
                         mkdir -p ~/.kube
                         cp ${KUBECONFIG_FILE} ~/.kube/config
                     """
+                }
+            }
+        }
+
+        stage('Check for Changes') {
+            steps {
+                script {
+                    // Checking if any changes exist in frontend or backend directories
+                    def changes = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
+                    echo "Changes: ${changes}"
+
+                    env.FRONTEND_CHANGED = changes.contains('frontend')
+                    env.BACKEND_CHANGED = changes.contains('backend')
+
+                    echo "Frontend Changed: ${env.FRONTEND_CHANGED}"
+                    echo "Backend Changed: ${env.BACKEND_CHANGED}"
                 }
             }
         }
@@ -77,17 +92,21 @@ environment {
             }
             steps {
                 script {
+                    echo "Deploy to Kubernetes started"
+
                     if (env.FRONTEND_CHANGED == "true") {
                         echo "Restarting Frontend Deployment in Kubernetes..."
                         sh """
-                            kubectl rollout restart deployment/react-app --namespace=${K8S_NAMESPACE}
+                            set -e
+                            kubectl rollout restart deployment/react-app --namespace=${K8S_NAMESPACE} || echo "Failed to restart frontend deployment"
                         """
                     }
 
                     if (env.BACKEND_CHANGED == "true") {
                         echo "Restarting Backend Deployment in Kubernetes..."
                         sh """
-                            kubectl rollout restart deployment/expressjs-app --namespace=${K8S_NAMESPACE}
+                            set -e
+                            kubectl rollout restart deployment/expressjs-app --namespace=${K8S_NAMESPACE} || echo "Failed to restart backend deployment"
                         """
                     }
                 }
