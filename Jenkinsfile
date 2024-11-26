@@ -7,7 +7,6 @@ environment {
     K8S_NAMESPACE = "default"
     DOCKER_REGISTRY = "docker.io"
     DOCKER_USERNAME = 'aakyuz1'
-    DOCKER_ID = "aakyuz1" // Docker ID'yi burada tanımlıyoruz
 }
 
 
@@ -47,9 +46,9 @@ environment {
                 script {
                     def frontendTag = "latest"
                     sh """
-                        docker image build -t ${FRONTEND_IMAGE}:latest .
-                        docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_ID}/${FRONTEND_IMAGE}:latest
-                        docker push ${DOCKER_ID}/${FRONTEND_IMAGE}:latest
+                        docker image build -t ${FRONTEND_IMAGE}:latest ./frontend
+                        docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                        docker push ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
                     """
                 }
             }
@@ -61,9 +60,9 @@ environment {
                 script {
                     def backendTag = "latest"
                     sh """
-                        docker image build -t ${BACKEND_IMAGE}:latest .
-                        docker tag ${BACKEND_IMAGE}:latest ${DOCKER_ID}/${BACKEND_IMAGE}:latest
-                        docker push ${DOCKER_ID}/${BACKEND_IMAGE}:latest
+                        docker image build -t ${BACKEND_IMAGE}:latest ./backend
+                        docker tag ${BACKEND_IMAGE}:latest ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker push ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
                     """
                 }
             }
