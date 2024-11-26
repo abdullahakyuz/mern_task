@@ -8,8 +8,6 @@ pipeline {
         FRONTEND_IMAGE = "react-app"
         BACKEND_IMAGE = "expressjs-app"
         K8S_NAMESPACE = "default"  // Kubernetes namespace, uygun şekilde güncellenebilir
-        DOCKER_USERNAME = credentials('docker-hub-credentials').getUsername() // Credentials fonksiyonu doğru kullanım
-        DOCKER_PASSWORD = credentials('docker-hub-credentials').getPassword() // Credentials fonksiyonu doğru kullanım
         DOCKER_REGISTRY = "docker.io"
     }
 
@@ -24,9 +22,11 @@ pipeline {
             steps {
                 script {
                     echo "Logging into Docker Hub..."
-                    sh """
-                        echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin ${DOCKER_REGISTRY}
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin ${DOCKER_REGISTRY}
+                        """
+                    }
                 }
             }
         }
