@@ -19,11 +19,10 @@ pipeline {
             steps {
                 script {
                     echo "Logging into Docker Hub..."
-            withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                // Docker Hub'a giriş yapmak için env değişkenlerini kullanıyoruz
-                sh """
-                    echo \${DOCKER_PASSWORD} | docker login -u \${DOCKER_USERNAME} --password-stdin ${DOCKER_REGISTRY}
-                """
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo \${DOCKER_PASSWORD} | docker login -u \${DOCKER_USERNAME} --password-stdin ${DOCKER_REGISTRY}
+                        """
                     }
                 }
             }
@@ -46,13 +45,11 @@ pipeline {
                 echo "Building, tagging, and pushing Frontend"
                 script {
                     def frontendTag = "latest"
-sh """
-    docker images
-    docker image build -t ${FRONTEND_IMAGE}:latest .
-    docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
-    docker push ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
-"""
-
+                    sh """
+                        docker image build -t ${FRONTEND_IMAGE}:latest .
+                        docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                        docker push ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                    """
                 }
             }
         }
@@ -63,10 +60,9 @@ sh """
                 script {
                     def backendTag = "latest"
                     sh """
-    docker images
-    docker image build -t ${BACKEND_IMAGE}:latest .
-    docker tag ${BACKEND_IMAGE}:latest ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
-    docker push ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker image build -t ${BACKEND_IMAGE}:latest .
+                        docker tag ${BACKEND_IMAGE}:latest ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker push ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
                     """
                 }
             }
