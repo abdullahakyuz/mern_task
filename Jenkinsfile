@@ -6,6 +6,8 @@ pipeline {
         BACKEND_IMAGE = "mern_backend"
         K8S_NAMESPACE = "default"
         DOCKER_REGISTRY = "docker.io"
+        DOCKER_ID: "aakyuz1"
+        DOCKER_PW: "Ukraynali1"
     }
 
     stages {
@@ -47,8 +49,8 @@ pipeline {
                     def frontendTag = "latest"
                     sh """
                         docker image build -t ${FRONTEND_IMAGE}:latest .
-                        docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
-                        docker push ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                        docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_ID}/${FRONTEND_IMAGE}:latest
+                        docker push ${DOCKER_ID}/${FRONTEND_IMAGE}:latest
                     """
                 }
             }
@@ -61,8 +63,8 @@ pipeline {
                     def backendTag = "latest"
                     sh """
                         docker image build -t ${BACKEND_IMAGE}:latest .
-                        docker tag ${BACKEND_IMAGE}:latest ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
-                        docker push ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker tag ${BACKEND_IMAGE}:latest ${DOCKER_ID}/${BACKEND_IMAGE}:latest
+                        docker push ${DOCKER_ID}/${BACKEND_IMAGE}:latest
                     """
                 }
             }
