@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        FRONTEND_DIR = "frontend"
-        BACKEND_DIR = "backend"
         FRONTEND_IMAGE = "mern_frontend"
         BACKEND_IMAGE = "mern_backend"
         K8S_NAMESPACE = "default"
@@ -50,10 +48,9 @@ pipeline {
                     def frontendTag = "latest"
 sh """
     docker images
-    docker image build -f ${FRONTEND_DIR}/Dockerfile -t ${FRONTEND_IMAGE}:${frontendTag} ${FRONTEND_DIR}
-    docker image tag ${FRONTEND_IMAGE}:${frontendTag} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
-    docker images  # Gerekirse, imajın burada görünüp görünmediğini kontrol edebilirsiniz.
-    docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:${frontendTag}
+    docker image build -t ${FRONTEND_IMAGE}:latest .
+    docker tag ${FRONTEND_IMAGE}:latest ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+    docker push ${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
 """
 
                 }
@@ -66,9 +63,10 @@ sh """
                 script {
                     def backendTag = "latest"
                     sh """
-                        docker image build -f ${BACKEND_DIR}/Dockerfile -t ${BACKEND_IMAGE}:${backendTag} ${BACKEND_DIR}
-                        docker image tag ${BACKEND_IMAGE}:${backendTag} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:${backendTag}
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:${backendTag}
+    docker images
+    docker image build -t ${BACKEND_IMAGE}:latest .
+    docker tag ${BACKEND_IMAGE}:latest ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+    docker push ${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
                     """
                 }
             }
