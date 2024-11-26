@@ -7,6 +7,7 @@ pipeline {
         K8S_NAMESPACE = "default"
         DOCKER_REGISTRY = "docker.io"
         DOCKER_USERNAME = 'aakyuz1'
+        BRANCH_NAME = "main" // veya uygun branch adı
     }
 
     stages {
@@ -43,7 +44,7 @@ pipeline {
             steps {
                 script {
                     // Checking if any changes exist in frontend or backend directories
-                    def changes = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
+                    def changes = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim()
                     echo "Changes: ${changes}"
 
                     env.FRONTEND_CHANGED = changes.contains('frontend')
