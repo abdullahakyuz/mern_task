@@ -7,7 +7,6 @@ pipeline {
         K8S_NAMESPACE = "default"
         DOCKER_REGISTRY = "docker.io"
         DOCKER_USERNAME = 'aakyuz1'
-        BRANCH_NAME = "main" // veya uygun branch adı
     }
 
     stages {
@@ -44,11 +43,12 @@ pipeline {
             steps {
                 script {
                     // Checking if any changes exist in frontend or backend directories
-                    def changes = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim()
+                    def changes = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
                     echo "Changes: ${changes}"
 
-                    env.FRONTEND_CHANGED = changes.contains('frontend')
-                    env.BACKEND_CHANGED = changes.contains('backend')
+                    // Default to false if there are no changes detected
+                    env.FRONTEND_CHANGED = changes.contains('frontend') ? "true" : "false"
+                    env.BACKEND_CHANGED = changes.contains('backend') ? "true" : "false"
 
                     echo "Frontend Changed: ${env.FRONTEND_CHANGED}"
                     echo "Backend Changed: ${env.BACKEND_CHANGED}"
@@ -57,6 +57,9 @@ pipeline {
         }
 
         stage('Build, Tag, and Push Frontend') {
+            when {
+                expression { env.FRONTEND_CHANGED == "true" }
+            }
             steps {
                 echo "Building, tagging, and pushing Frontend"
                 script {
@@ -71,6 +74,9 @@ pipeline {
         }
 
         stage('Build, Tag, and Push Backend') {
+            when {
+                expression { env.BACKEND_CHANGED == "true" }
+            }
             steps {
                 echo "Building, tagging, and pushing Backend"
                 script {
