@@ -57,18 +57,26 @@ pipeline {
             }
         }
 
-        stage('Force Delete Old Pods') {
-            steps {
-                echo "Waiting 30 seconds before force deleting old pods"
-                script {
-                    sleep 30
-                    echo "Force deleting old pods in terminating state"
-                    sh """
-                        kubectl get pods --namespace=${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs -r kubectl delete --force --grace-period=0
-                    """
-                }
+stage('Force Delete Old Pods') {
+    steps {
+        echo "Waiting 30 seconds before force deleting old pods"
+        script {
+            sleep 30
+            echo "Force deleting old pods in terminating state"
+            // List Terminating pods and try force deleting them
+            def pods = sh(script: "kubectl get pods --namespace=${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name", returnStdout: true).trim()
+            if (pods) {
+                // Only proceed if there are pods to delete
+                echo "Deleting following Terminating pods: ${pods}"
+                sh """
+                    echo ${pods} | xargs -r kubectl delete --force --grace-period=0 --namespace=${K8S_NAMESPACE}
+                """
+            } else {
+                echo "No Terminating pods found"
             }
         }
+    }
+}
 
         stage('Build, Tag, and Push Frontend') {
             when {
