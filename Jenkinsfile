@@ -8,26 +8,12 @@ pipeline {
         FRONTEND_IMAGE = "react-app"
         BACKEND_IMAGE = "expressjs-app"
         K8S_NAMESPACE = "default"  // Kubernetes namespace, uygun şekilde güncellenebilir
-        DOCKER_REGISTRY = "docker.io"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Docker Login') {
-            steps {
-                script {
-            echo "Logging into Docker Hub..."
-            withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                sh """
-                    echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}
-                """
-                    }
-                }
             }
         }
 
@@ -42,31 +28,35 @@ pipeline {
             }
         }
 
-        stage('Build, Tag, and Push Frontend') {
+        stage('Build and Deploy Frontend') {
             when {
                 expression { env.FRONTEND_CHANGED.toBoolean() }
             }
             steps {
-                echo "Building, tagging, and pushing Frontend"
+                echo "Building and Deploying Frontend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest ${FRONTEND_DIR}
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${FRONTEND_IMAGE}:latest
+                        docker build -t ${FRONTEND_IMAGE}:latest ${FRONTEND_DIR}
+                        docker stop ${FRONTEND_IMAGE} || true
+                        docker rm ${FRONTEND_IMAGE} || true
+                        docker run -d --name ${FRONTEND_IMAGE} -p 80:80 ${FRONTEND_IMAGE}:latest
                     """
                 }
             }
         }
 
-        stage('Build, Tag, and Push Backend') {
+        stage('Build and Deploy Backend') {
             when {
                 expression { env.BACKEND_CHANGED.toBoolean() }
             }
             steps {
-                echo "Building, tagging, and pushing Backend"
+                echo "Building and Deploying Backend"
                 script {
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest ${BACKEND_DIR}
-                        docker push ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${BACKEND_IMAGE}:latest
+                        docker build -t ${BACKEND_IMAGE}:latest ${BACKEND_DIR}
+                        docker stop ${BACKEND_IMAGE} || true
+                        docker rm ${BACKEND_IMAGE} || true
+                        docker run -d --name ${BACKEND_IMAGE} -p 3000:3000 ${BACKEND_IMAGE}:latest
                     """
                 }
             }
@@ -95,7 +85,8 @@ pipeline {
                     try {
                         // Kubernetes komutlarını çalıştır
                         sh """
-                            kubectl get pods --field-selector=status.phase=Terminating -o name | xargs kubectl delete --force --grace-period=0
+                            kubectl get pods -n ${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name | xargs kubectl delete -n ${K8S_NAMESPACE} --force --grace-period=0
+                            kubectl get pods --field-selector=status.phase=Terminating -o name | xargs kubectl delete
                         """
                     } catch (Exception e) {
                         echo "Failed to delete terminating pods: ${e.getMessage()}"
