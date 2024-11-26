@@ -44,14 +44,15 @@ pipeline {
 
         stage('Determine Changes') {
             steps {
-                script {
-                    echo "Determining changes..."
-                    def changes = sh(script: "git diff --name-only origin/main...HEAD", returnStdout: true).trim()
-                    env.FRONTEND_CHANGED = changes.contains("${FRONTEND_DIR}/") ? "true" : "false"
-                    env.BACKEND_CHANGED = changes.contains("${BACKEND_DIR}/") ? "true" : "false"
-                    echo "Frontend Changed: ${env.FRONTEND_CHANGED}"
-                    echo "Backend Changed: ${env.BACKEND_CHANGED}"
-                }
+        script {
+            echo "Determining changes..."
+            def changes = sh(script: "git diff --name-only origin/main...HEAD", returnStdout: true).trim()
+            echo "Git Diff Output: ${changes}"
+            env.FRONTEND_CHANGED = changes.contains("${FRONTEND_DIR}/") ? "true" : "false"
+            env.BACKEND_CHANGED = changes.contains("${BACKEND_DIR}/") ? "true" : "false"
+            echo "Frontend Changed: ${env.FRONTEND_CHANGED}"
+            echo "Backend Changed: ${env.BACKEND_CHANGED}"
+        }
             }
         }
 
