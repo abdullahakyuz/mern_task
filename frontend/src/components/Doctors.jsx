@@ -19,6 +19,8 @@ const Doctors = ({ apps, setApps }) => {
 
     addLocal("appointments",[...apps, newAppo])
   };
+
+  
   return (
     <Container>
       <h3 className="display-6 mb-3" style={{ color: "rgb(166, 18, 189)" }}>
