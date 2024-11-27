@@ -50,6 +50,7 @@ Once both images are built, you can use the `docker-compose.yml` file located in
 
 ```bash
 docker-compose up
+```bash
 
 ### Congratulations! Your MERN stack is now running!
 
