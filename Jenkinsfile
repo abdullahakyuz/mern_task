@@ -42,9 +42,7 @@ pipeline {
         stage('Check for Changes') {
             steps {
                 script {
-                    // Fetch the latest changes to ensure we are checking against the correct state
                     sh 'git fetch origin'
-                    // Checking if any changes exist in frontend or backend directories
                     def changes = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
                     echo "Changes: ${changes}"
 
@@ -63,10 +61,8 @@ stage('Force Delete Old Pods') {
         script {
             sleep 30
             echo "Force deleting old pods in terminating state"
-            // List Terminating pods and try force deleting them
             def pods = sh(script: "kubectl get pods --namespace=${K8S_NAMESPACE} --field-selector=status.phase=Terminating -o name", returnStdout: true).trim()
             if (pods) {
-                // Only proceed if there are pods to delete
                 echo "Deleting following Terminating pods: ${pods}"
                 sh """
                     echo ${pods} | xargs -r kubectl delete --force --grace-period=0 --namespace=${K8S_NAMESPACE}

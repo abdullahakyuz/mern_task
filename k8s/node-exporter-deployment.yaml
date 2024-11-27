@@ -29,4 +29,4 @@ spec:
     - protocol: TCP
       port: 9100
       targetPort: 9100
-  type: ClusterIP     # Monitoring servisi olduğu için ClusterIP türü
+  type: ClusterIP

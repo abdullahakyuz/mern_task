@@ -29,4 +29,4 @@ spec:
     - protocol: TCP
       port: 9090
       targetPort: 9090
-  type: NodePort       # NodePort kullanarak dışarıdan erişim sağlanacak
+  type: NodePort       

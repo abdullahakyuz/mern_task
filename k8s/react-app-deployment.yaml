@@ -34,4 +34,4 @@ spec:
       port: 80            # Kubernetes servisi üzerinden kullanılacak port
       targetPort: 80      # Pod içerisindeki container portu
       nodePort: 30000     # Dış dünyadan erişmek için belirlediğiniz port
-  type: NodePort         # Bu servis türü dışarıdan erişime izin verir
+  type: NodePort         

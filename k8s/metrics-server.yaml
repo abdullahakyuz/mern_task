@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: metrics-server
-        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1  # İmajı ekledik
+        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
         args:
           - --kubelet-preferred-address-types=InternalIP
           - --kubelet-client-certificate=/etc/kubernetes/pki/metrics-server.crt
@@ -23,8 +23,8 @@ spec:
         volumeMounts:
         - mountPath: /etc/kubernetes/pki
           name: kube-pki
-      volumes:  # Volumes kısmını ekledik
+      volumes:  
       - name: kube-pki
         hostPath:
-          path: /etc/kubernetes/pki  # Kubernetes'in sertifikalarının bulunduğu yol
+          path: /etc/kubernetes/pki  
           type: Directory

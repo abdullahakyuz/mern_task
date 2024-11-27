@@ -3,11 +3,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
-// CORS yapılandırmasını etkinleştirin
-app.use(cors());  // Bu, tüm origin'lere izin verir.
 
-// MongoDB bağlantı ayarları (Docker Compose'da servis adı kullanılarak güncellendi)
-mongoose.connect('mongodb://mongodb:27017/mern-db', {  // "mongodb" burada servis adıdır
+app.use(cors());  
+
+mongoose.connect('mongodb://mongodb:27017/mern-db', {  
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -18,15 +17,12 @@ mongoose.connect('mongodb://mongodb:27017/mern-db', {  // "mongodb" burada servi
     console.error('MongoDB bağlantısı başarısız: ', err);
   });
 
-// Middleware
 app.use(express.json());
 
-// Basit bir GET isteği ile test endpoint
 app.get('/', (req, res) => {
   res.send('Express.js Backend çalışıyor!');
 });
 
-// API endpoint
 app.get('/api-endpoint', (req, res) => {
   res.json({ message: "API'den veri başarıyla alındı!" });
 });
