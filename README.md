@@ -65,8 +65,10 @@ You can access **Grafana** at port `32000` to view project metrics and monitor y
 
 To deploy the project on Kubernetes, run:
 
-```bash
-kubectl apply -f /k8s
+
+    ```bash
+    kubectl apply -f /k8s
+    ```
 
 ## Congratulations! Your project is now running on Kubernetes with auto-scaling.
 
