@@ -48,8 +48,8 @@ This project utilizes **3 AWS EC2 instances**:
 
 Once both images are built, you can use the `docker-compose.yml` file located in the project’s root directory to bring up the entire application:
 
-```bash
-docker-compose up
+    ```bash
+    docker-compose up -d
     ```
 
 ### Congratulations! Your MERN stack is now running!
