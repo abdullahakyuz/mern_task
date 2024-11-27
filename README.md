@@ -1,70 +1,39 @@
-# Getting Started with Create React App
+# MERN Stack Project with Terraform, Docker, Kubernetes, and Jenkins
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a **MERN Stack** application that integrates several tools and services including **Terraform**, **Docker**, **Kubernetes**, and **Jenkins** for a complete DevOps setup. The project includes frontend and backend services with monitoring and CI/CD automation.
 
-## Available Scripts
+## Prerequisites
 
-In the project directory, you can run:
+- AWS EC2 instances
+- Docker
+- Kubernetes
+- Jenkins
+- Terraform
+- Prometheus & Grafana (for monitoring)
 
-### `npm start`
+## Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### AWS EC2 Infrastructure with Terraform
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The infrastructure for this project is managed using **Terraform**. To set up the architecture, follow these steps:
 
-### `npm test`
+1. Review and customize the **Terraform** files to suit your environment.
+2. Run `terraform init` to initialize the working directory.
+3. Run `terraform apply` to create the resources in AWS.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This project utilizes **3 AWS EC2 instances**:
+- One EC2 instance acts as the **Kubernetes master-node**.
+- Another EC2 instance serves as the **worker-node**.
+- The third EC2 instance hosts the **MongoDB** database.
 
-### `npm run build`
+### Docker Setup
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- The **frontend** Docker image can be built from the `frontend/Dockerfile` located in the frontend directory. 
+  - Log in to Docker, and upload the image to your Docker Hub.
+  
+- Similarly, the **backend** Docker image is built using the `backend/Dockerfile` in the backend directory.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Once the images are ready, use the `docker-compose.yml` file located in the project’s root directory to bring up the application:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+docker-compose up
